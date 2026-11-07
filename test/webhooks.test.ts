@@ -35,4 +35,17 @@ describe("POST /webhooks/order", () => {
     const res = await postWebhook(ctx.app, { id: "x" });
     expect(res.statusCode).toBe(400);
   });
+
+  it("amountPaid: null трактуется так же, как отсутствие поля — без скидки", async () => {
+    const o = apiOrder({ amount: 500, amountPaid: null });
+    const res = await postWebhook(ctx.app, o);
+    expect(res.statusCode).toBe(200);
+    const { rows } = await ctx.db.query(`SELECT amount_kop, amount_paid_kop FROM orders WHERE id = $1`, [o.id]);
+    expect(Number(rows[0].amount_paid_kop)).toBe(Number(rows[0].amount_kop));
+  });
+
+  it("amountPaid больше amount — невалидный заказ, 400", async () => {
+    const res = await postWebhook(ctx.app, apiOrder({ amount: 500, amountPaid: 600 }));
+    expect(res.statusCode).toBe(400);
+  });
 });

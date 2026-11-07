@@ -9,8 +9,10 @@ const ExternalOrder = z.object({
   id: z.string().min(1),
   customerId: z.string().min(1),
   amount: z.union([z.number(), z.string()]),
-  // Появились недавно: у части старых заказов ещё не отдаются — без скидки.
-  amountPaid: z.union([z.number(), z.string()]).optional(),
+  // Появились недавно: у части старых заказов ещё не отдаются (нет ключа) — без скидки.
+  // Внешняя система иногда присылает отсутствующие поля как null, а не опускает ключ,
+  // поэтому принимаем оба варианта.
+  amountPaid: z.union([z.number(), z.string()]).nullish(),
   status: z.enum(["pending", "paid", "refunded"]),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -27,11 +29,15 @@ export class OrdersService {
     const o = parsed.data;
     try {
       const amountKop = toKop(parseRub(o.amount));
+      const amountPaidKop = o.amountPaid == null ? amountKop : toKop(parseRub(o.amountPaid));
+      if (amountPaidKop > amountKop) {
+        throw new Error(`amountPaid (${o.amountPaid}) exceeds amount (${o.amount})`);
+      }
       return {
         id: o.id,
         customerId: o.customerId,
         amountKop,
-        amountPaidKop: o.amountPaid === undefined ? amountKop : toKop(parseRub(o.amountPaid)),
+        amountPaidKop,
         status: o.status,
         createdAt: parseUtc(o.createdAt),
         updatedAt: parseUtc(o.updatedAt),
