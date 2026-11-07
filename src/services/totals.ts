@@ -46,12 +46,9 @@ export class TotalsService {
         cur.net += o.amountPaidKop;
       }
     }
-    return [...sums].map(([date, { gross, net }]) => ({
-      date,
-      total: fromKop(gross),
-      gross: fromKop(gross),
-      discount: fromKop(gross - net),
-      net: fromKop(net),
-    }));
+    return [...sums].map(([date, { gross, net }]) => {
+      const grossRub = fromKop(gross);
+      return { date, total: grossRub, gross: grossRub, discount: fromKop(gross - net), net: fromKop(net) };
+    });
   }
 }
