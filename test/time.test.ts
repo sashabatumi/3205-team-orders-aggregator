@@ -24,6 +24,14 @@ describe("tzOffsetMinutes", () => {
     expect(tzOffsetMinutes("Asia/Novosibirsk", at)).toBe(420);
     expect(tzOffsetMinutes("America/New_York", at)).toBe(-300);
   });
+
+  it("учитывает переход на летнее время — смещение зависит от конкретного момента, а не только от зоны", () => {
+    // Europe/Berlin переходит на летнее время в последнее воскресенье марта, 01:00 UTC.
+    expect(tzOffsetMinutes("Europe/Berlin", new Date("2026-03-29T00:59:00Z"))).toBe(60);
+    expect(tzOffsetMinutes("Europe/Berlin", new Date("2026-03-29T01:00:00Z"))).toBe(120);
+    // Europe/Moscow DST не применяет — смещение постоянно весь год.
+    expect(tzOffsetMinutes("Europe/Moscow", new Date("2026-03-29T01:00:00Z"))).toBe(180);
+  });
 });
 
 describe("даты", () => {
