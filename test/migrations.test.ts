@@ -34,6 +34,12 @@ describe("миграция 002_order_discounts.sql", () => {
         `SELECT amount_kop, amount_paid_kop FROM legacy_orders WHERE id = 'o_legacy'`,
       );
       expect(Number(rows[0].amount_paid_kop)).toBe(Number(rows[0].amount_kop));
+
+      const { rows: columnRows } = await client.query<{ is_nullable: string }>(
+        `SELECT is_nullable FROM information_schema.columns
+          WHERE table_name = 'legacy_orders' AND column_name = 'amount_paid_kop'`,
+      );
+      expect(columnRows[0].is_nullable).toBe("NO");
     } finally {
       await client.query("ROLLBACK");
       client.release();

@@ -12,6 +12,8 @@ export function parseUtc(raw: unknown): Date {
   return d;
 }
 
+// Без eviction: ключ — IANA-таймзона из доверенного внешнего API, конечное множество
+// (пара сотен значений), не ввод пользователя — неограниченного роста не бывает.
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
 /** Смещение таймзоны относительно UTC в минутах в момент `at` (Europe/Moscow → 180). */
