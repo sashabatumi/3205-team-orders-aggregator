@@ -9,9 +9,7 @@ const ExternalOrder = z.object({
   id: z.string().min(1),
   customerId: z.string().min(1),
   amount: z.union([z.number(), z.string()]),
-  // Появились недавно: у части старых заказов ещё не отдаются (нет ключа) — без скидки.
-  // Внешняя система иногда присылает отсутствующие поля как null, а не опускает ключ,
-  // поэтому принимаем оба варианта.
+  // Появились недавно: у старых заказов отсутствуют (как null или без ключа) — без скидки.
   amountPaid: z.union([z.number(), z.string()]).nullish(),
   status: z.enum(["pending", "paid", "refunded"]),
   createdAt: z.string(),

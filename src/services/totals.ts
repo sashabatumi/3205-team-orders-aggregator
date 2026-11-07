@@ -35,9 +35,8 @@ export class TotalsService {
 
     const sums = new Map(datesBetween(from, to).map((d) => [d, { gross: 0, net: 0 }]));
     for (const o of rows) {
-      // Смещение зависит от даты (переход на летнее/зимнее время), поэтому считаем
-      // его для момента создания заказа, а не для "сейчас" — иначе дни вокруг
-      // перехода на DST сдвигаются на час и попадают не в тот календарный день.
+      // Смещение берём на момент заказа, а не "сейчас" — иначе дни вокруг перехода
+      // на летнее/зимнее время сдвигаются на час и попадают не в тот календарный день.
       const offset = tzOffsetMinutes(timezone, o.createdAt);
       const date = dateAtOffset(o.createdAt, offset);
       const cur = sums.get(date);
